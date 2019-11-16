@@ -10,6 +10,7 @@
 // Which pin on the Arduino is connected to the NeoPixels?
 #define PIN        2 // On Trinket or Gemma, suggest changing this to 1
 #define PINTEMP    3
+#define PINMOTOR   4
 
 // How many NeoPixels are attached to the Arduino?
 #define NUMPIXELS 10 // Popular NeoPixel ring size
@@ -27,6 +28,10 @@ int relative[24] = {70.73, 71.04, 70.97, 71.31, 71.16, 71.02, 70.70, 70.11, 68.9
 int temp_size = 24;
 int temperature[24] = {10.24, 10.00, 9.80, 9.43, 9.25, 9.14, 10.30, 10.36, 10.90, 11.51, 12.29, 13.04, 13.94, 14.64, 15.22, 14.99, 14.44, 14.38, 14.34, 13.55, 12.73, 11.83, 11.06, 10.70};
 
+// 4 - Carbon Monoxide effect on Cloud
+int carbon_size = 24;
+int carbon[24] = {1439.89, 1172.50, 957.99, 1016.86, 1007.91, 1338.64, 1790.60, 1797.96, 1816.01, 1787.33, 1794.61, 1601.61, 1370.77, 1347.63, 1097.64, 1328.28, 1044.00, 1062.29, 1155.27, 1171.24, 1022.24, 1212.49, 1272.88, 1304.69};
+
 
 // When setting up the NeoPixel library, we tell it how many pixels,
 // and which pin to use to send signals. Note that for older NeoPixel
@@ -37,7 +42,10 @@ Adafruit_NeoPixel temps(NUMPIXELSTEMP, PINTEMP, NEO_RGB + NEO_KHZ800);
 
 
 #define DELAYVAL 100 // Time (in milliseconds) to pause between pixels
-#define SAMPLE_DELAY 3000
+#define SAMPLE_DELAY 30
+#define SAMPLE_DELAY2 20
+#define SAMPLE_DELAY3 10
+#define SAMPLE_DELAY4 5
 
 void setup() {
   // These lines are specifically to support the Adafruit Trinket 5V 16 MHz.
@@ -51,6 +59,7 @@ void setup() {
   temps.begin();
   
   pinMode(13,OUTPUT);
+  pinMode(PINMOTOR, OUTPUT);
   digitalWrite(13,HIGH);
 }
 
@@ -74,64 +83,54 @@ int humidity(int j){
   return rainInc;
 }
 
-void rainfall(int sample_max) {
+void rainfall(int j, int sample_max) {
   // The first NeoPixel in a strand is #0, second is 1, all the way up
   // to the count of pixels minus one.
   
-  int nitric_counter;
+  int nitric_counter = 0;
   int green, blue, red;
-  
-  
-  for (int j = 0; j < nitric_size; j++) {
-    
-    nitric_counter = 0;
-    rainInc = humidity(j);
+   
+  rainInc = humidity(j);
 
-    // Colour Bands based on Nitric Oxide - Time data
-     
-    if (nitric[j] < 6.5) {
-      blue = 255;
-      green = 200;
-      red = 50;
-    }
-    else if (nitric[j] >= 6.5 && nitric[j] < 8){
-      blue = 70;
-      green = 0;
-      red = 255;
-    }
-    else {
-      red = 255;
-      blue = 0;
-      green = 0;
-    }
+  // Colour Bands based on Nitric Oxide - Time data
+   
+  if (nitric[j] < 6.5) {
+    blue = 255;
+    green = 200;
+    red = 50;
+  }
+  else if (nitric[j] >= 6.5 && nitric[j] < 8){
+    blue = 70;
+    green = 0;
+    red = 255;
+  }
+  else {
+    red = 255;
+    blue = 0;
+    green = 0;
+  }
 
-    while (nitric_counter < sample_max) {
+  while (nitric_counter < sample_max) {
 
-      for(int i = NUMPIXELS - 1; i > 0; i--) { // For each pixel...
-        
-        pixels.clear();
+    for(int i = NUMPIXELS - 1; i > 0; i--) { // For each pixel...
+      
+      pixels.clear();
 
-        // pixels.Color() takes RGB values, from 0,0,0 up to 255,255,255 - Here we're using a moderately bright green color:
-        /*
-        pixels.setPixelColor(i, pixels.Color(green, red, blue));
-        pixels.setPixelColor((i + 2) % 10, pixels.Color(green, red, blue));
-        pixels.setPixelColor((i + 5) % 10, pixels.Color(green, red, blue));
-        pixels.setPixelColor((i + 7) % 10, pixels.Color(green, red, blue));
-        */
-        for (int k = 9; k > 0; k -= rainInc) {
-          pixels.setPixelColor((i + k) % 10, pixels.Color(green, red, blue));
-        }
-        
-        pixels.show();
-        nitric_counter += 1;
+      // pixels.Color() takes RGB values, from 0,0,0 up to 255,255,255 - Here we're using a moderately bright green color:
 
-        delay(DELAYVAL); // Pause before next pass through loop
+      for (int k = 9; k > 0; k -= rainInc) {
+        pixels.setPixelColor((i + k) % 10, pixels.Color(green, red, blue));
       }
+      
+      pixels.show();
+      nitric_counter += 1;
+
+      delay(DELAYVAL); // Pause before next pass through loop
     }
   }
 }
 
-void temp(int sample_max){
+void temp(int j, int sample_max){
 
   int nitric_counter;
   int green, blue, red;
@@ -139,8 +138,34 @@ void temp(int sample_max){
 }
 
 void loop() {
-
-  rainfall(30);
-  temp(30);
   
+  // Story for 3s resolution
+  for (int j = 0; j < nitric_size; j++){
+     rainfall(j, SAMPLE_DELAY);
+     temp(j, SAMPLE_DELAY);
+  }
+
+  delay(2000);
+  
+  // Story for 2s resolution
+  for (int j = 0; j < nitric_size; j++){
+     rainfall(j, SAMPLE_DELAY2);
+     temp(j, SAMPLE_DELAY2);
+  }
+
+  delay(2000);
+  
+  // Story for 1s resolution
+  for (int j = 0; j < nitric_size; j++){
+     rainfall(j, SAMPLE_DELAY3);
+     temp(j, SAMPLE_DELAY3);
+  }
+
+  delay(2000);
+
+  // Story for 0.5s resolution
+  for (int j = 0; j < nitric_size; j++){
+     rainfall(j, SAMPLE_DELAY4);
+     temp(j, SAMPLE_DELAY4);
+  }
 }
