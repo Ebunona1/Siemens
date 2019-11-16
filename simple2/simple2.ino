@@ -9,11 +9,11 @@
 
 // Which pin on the Arduino is connected to the NeoPixels?
 #define PIN        2 // On Trinket or Gemma, suggest changing this to 1
+#define PINTEMP    3
 
 // How many NeoPixels are attached to the Arduino?
 #define NUMPIXELS 10 // Popular NeoPixel ring size
-
-int green, blue, red;
+#define NUMPIXELSTEMP 28 // Number of pixels in our temp atmosphere
 
 // 1 - Nitric Oxide effect on Acid Rain
 int nitric_size = 24;
@@ -23,11 +23,18 @@ int nitric[24] = {6.25, 6.23, 6.36, 6.90, 6.99, 7.21, 9.43, 7.38, 7.65, 8.26, 7.
 int relative_size = 24;
 int relative[24] = {70.73, 71.04, 70.97, 71.31, 71.16, 71.02, 70.70, 70.11, 68.99, 66.97, 64.82, 62.50, 59.12, 56.91, 56.25, 56.49, 56.75, 57.22, 55.98, 58.17, 61.97, 65.20, 67.73, 69.13};
 
+// 3 - Temperature effect on Atmosphere
+int temp_size = 24;
+int temperature[24] = {10.24, 10.00, 9.80, 9.43, 9.25, 9.14, 10.30, 10.36, 10.90, 11.51, 12.29, 13.04, 13.94, 14.64, 15.22, 14.99, 14.44, 14.38, 14.34, 13.55, 12.73, 11.83, 11.06, 10.70};
+
+
 // When setting up the NeoPixel library, we tell it how many pixels,
 // and which pin to use to send signals. Note that for older NeoPixel
 // strips you might need to change the third parameter -- see the
 // strandtest example for more information on possible values.
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_RGB + NEO_KHZ800);
+Adafruit_NeoPixel temps(NUMPIXELSTEMP, PINTEMP, NEO_RGB + NEO_KHZ800);
+
 
 #define DELAYVAL 100 // Time (in milliseconds) to pause between pixels
 #define SAMPLE_DELAY 3000
@@ -41,6 +48,8 @@ void setup() {
   // END of Trinket-specific code.
 
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
+  temps.begin();
+  
   pinMode(13,OUTPUT);
   digitalWrite(13,HIGH);
 }
@@ -65,19 +74,13 @@ int humidity(int j){
   return rainInc;
 }
 
-void setSeq(int i, int inc){
-  
-  
-  //pixels.setPixelColor((i + 9) % 10, pixels.Color(green, 0, blue));
-    
-     // Send the updated pixel colors to the hardware.
-}
-
 void rainfall(int sample_max) {
   // The first NeoPixel in a strand is #0, second is 1, all the way up
   // to the count of pixels minus one.
   
   int nitric_counter;
+  int green, blue, red;
+  
   
   for (int j = 0; j < nitric_size; j++) {
     
@@ -128,8 +131,16 @@ void rainfall(int sample_max) {
   }
 }
 
+void temp(int sample_max){
+
+  int nitric_counter;
+  int green, blue, red;
+    
+}
+
 void loop() {
 
   rainfall(30);
+  temp(30);
   
 }
