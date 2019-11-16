@@ -29,6 +29,7 @@ np.sort(arr, order="time")
 x = [i[1] for i in arr]
 y = [j[0] for j in arr]
 
+print(arr)
+
 plt.plot(x, y)
 plt.show()
-print(data_arr)
