@@ -45,39 +45,32 @@ void setup() {
   digitalWrite(13,HIGH);
 }
 
+int rainInc;
+
 int humidity(int j){
 
   // The first NeoPixel in a strand is #0, second is 1, all the way up
   // to the count of pixels minus one.
-
-  int rainInc;
   
-  if (relative[j] > 68){
-    rainInc = 1;
-  } 
-  else if (relative[j] <= 68 && relative[j] > 64){
-    rainInc = 2;
-  }
-  else if (relative[j] <= 64 && relative[j] > 60){
+  if (relative[j] > 70){
     rainInc = 3;
-  }
-  else if (relative[j] <= 60){
+  } 
+  else if (relative[j] <= 70 && relative[j] > 60){
     rainInc = 5;
   }
+  else if (relative[j] <= 60){
+    rainInc = 7;
+  }
+
+  return rainInc;
 }
 
-void setSeq(int i){
+void setSeq(int i, int inc){
   
-  pixels.clear();
-
-        // pixels.Color() takes RGB values, from 0,0,0 up to 255,255,255 - Here we're using a moderately bright green color:
-        pixels.setPixelColor(i, pixels.Color(green, red, blue));
-        pixels.setPixelColor((i + 2) % 10, pixels.Color(green, red, blue));
-        pixels.setPixelColor((i + 5) % 10, pixels.Color(green, red, blue));
-        pixels.setPixelColor((i + 7) % 10, pixels.Color(green, red, blue));
-        //pixels.setPixelColor((i + 9) % 10, pixels.Color(green, 0, blue));
+  
+  //pixels.setPixelColor((i + 9) % 10, pixels.Color(green, 0, blue));
     
-        pixels.show();   // Send the updated pixel colors to the hardware.
+     // Send the updated pixel colors to the hardware.
 }
 
 void rainfall(int sample_max) {
@@ -85,12 +78,6 @@ void rainfall(int sample_max) {
   // to the count of pixels minus one.
   
   int nitric_counter;
-  int rainInc;
-  
-  int oneInc[5] = {9, 8, 6, 4, 2};
-  int twoInc[4] = {9, 7, 4, 1};
-  int threeInc[3] = {9, 6, 2};
-  int fiveInc[2] = {9, 4};
   
   for (int j = 0; j < nitric_size; j++) {
     
@@ -104,7 +91,7 @@ void rainfall(int sample_max) {
       green = 200;
       red = 50;
     }
-    else if (nitric >= 6.5 && nitric[j] < 8){
+    else if (nitric[j] >= 6.5 && nitric[j] < 8){
       blue = 70;
       green = 0;
       red = 255;
@@ -119,10 +106,22 @@ void rainfall(int sample_max) {
 
       for(int i = NUMPIXELS - 1; i > 0; i--) { // For each pixel...
         
+        pixels.clear();
+
+        // pixels.Color() takes RGB values, from 0,0,0 up to 255,255,255 - Here we're using a moderately bright green color:
+        /*
+        pixels.setPixelColor(i, pixels.Color(green, red, blue));
+        pixels.setPixelColor((i + 2) % 10, pixels.Color(green, red, blue));
+        pixels.setPixelColor((i + 5) % 10, pixels.Color(green, red, blue));
+        pixels.setPixelColor((i + 7) % 10, pixels.Color(green, red, blue));
+        */
+        for (int k = 9; k > 0; k -= rainInc) {
+          pixels.setPixelColor((i + k) % 10, pixels.Color(green, red, blue));
+        }
         
-  
+        pixels.show();
         nitric_counter += 1;
-    
+
         delay(DELAYVAL); // Pause before next pass through loop
       }
     }
