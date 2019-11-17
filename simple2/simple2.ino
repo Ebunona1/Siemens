@@ -35,6 +35,9 @@ int temperature[24] = {10.24, 10.00, 9.80, 9.43, 9.25, 9.14, 10.30, 10.36, 10.90
 int carbon_size = 24;
 int carbon[24] = {1439.89, 1172.50, 957.99, 1016.86, 1007.91, 1338.64, 1790.60, 1797.96, 1816.01, 1787.33, 1794.61, 1601.61, 1370.77, 1347.63, 1097.64, 1328.28, 1044.00, 1062.29, 1155.27, 1171.24, 1022.24, 1212.49, 1272.88, 1304.69};
 
+// 5 - Nitrogen Dioxide effect on Growth
+int flowers_size = 24;
+int flowers[24] = {16.95, 15.35, 13.45, 12.85, 12.27, 12.01, 5.57, 13.52, 12.43, 11.14, 10.05, 10.36, 9.18, 9.57, 12.08, 13.05, 13.42, 14.79, 13.76, 15.78, 19.24, 20.77, 19.69, 18.26};
 
 // When setting up the NeoPixel library, we tell it how many pixels,
 // and which pin to use to send signals. Note that for older NeoPixel
@@ -42,7 +45,6 @@ int carbon[24] = {1439.89, 1172.50, 957.99, 1016.86, 1007.91, 1338.64, 1790.60, 
 // strandtest example for more information on possible values.
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_RGB + NEO_KHZ800);
 Adafruit_NeoPixel temps(NUMPIXELSTEMP, PINTEMP, NEO_RGB + NEO_KHZ800);
-
 
 #define DELAYVAL 100 // Time (in milliseconds) to pause between pixels
 #define SAMPLE_DELAY 20
@@ -60,36 +62,19 @@ void setup() {
 #endif
   // END of Trinket-specific code.
 
-  
-
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
   temps.begin();
-
-  
-  turnClockwise(SERVOPERIOD / 3);
-  //delay(1000);
-  turnCounterclockwise(SERVOPERIOD / 3);
   
   pinMode(13,OUTPUT);
   pinMode(PINMOTOR, OUTPUT);
   digitalWrite(13,HIGH);
 }
 
-void turnClockwise(int d) {
-  flowerServo.attach(PINSERVO);
-  flowerServo.write(0);
-  delay(d);
-  flowerServo.detach();
-}
-
-void turnCounterclockwise(int d) {
-  flowerServo.attach(PINSERVO);
-  flowerServo.write(120);
-  delay(d);
-  flowerServo.detach();
-}
-
-int rainInc;
+// Initial states
+int rainInc = 3;
+int rgreen, rblue, rred; // rain colour
+int tgreen, tblue, tred, // temperature colour
+float nitrOx;
 
 int humidity(int j){
 
@@ -114,13 +99,10 @@ void story(int j, int sample_max) {
   // to the count of pixels minus one.
   
   int nitric_counter = 0;
-  int rgreen, rblue, rred; // rain colour
-  int tgreen, tblue, tred, // temperature colour
    
-  rainInc = humidity(j);
+  // rainInc = humidity(j);
 
-  // Colour Bands based on Nitric Oxide - Time data
-   
+  // Colour Bands based on Nitric Oxide and Carbon Monoxide (Rain Acidity and Storm)
   if (nitric[j] < 6.5) {
     rblue = 255;
     rgreen = 200;
@@ -137,38 +119,48 @@ void story(int j, int sample_max) {
     rgreen = 0;
   }
 
-  // Temperature
+  // Colour Bands based on Temperature and RH relationship (Rain and Atmosphere)
   
-  if (temperature[j] < 10) {
+  if (temperature[j] < 11) {
+    if (relative[j] > 70){
+      
+      rainInc = 3;
+    } 
+    else if (relative[j] <= 70 && relative[j] > 60){
+      
+      rainInc = 5;
+    }
+    else if (relative[j] <= 60){
+      
+      rainInc = 7;
+    }
     tblue = 255;
     tgreen = 200;
     tred = 50;
+    rainInc = 3;
   }
-  else if (temperature[j] >= 10 && temperature[j] < 11){
+  else if (temperature[j] >= 11 && temperature[j] < 13.5){
     tblue = 211;
     tgreen = 149;
     tred = 98;
   }
-  else if (temperature[j] >= 11 && temperature[j] < 12){
-    tblue = 211;
-    tgreen = 149;
-    tred = 98;
-  }
-  /*
-  else if (temperature[j] >= 12 && temperature[j] < 13){
-  
-  }
-  else if (temperature[j] >= 13 && temperature[j] < 14){
-  
-  }
-  */
   else {
     tred = 255;
     tblue = 0;
     tgreen = 50;
   }
 
+  nitrOx = flowers[j];
+
   while (nitric_counter < sample_max) {
+
+    if (nitrOx < 12.3) {
+      flowerServo.detach();
+    }
+    else {
+      flowerServo.attach(PINSERVO);
+      flowerServo.write(0);
+    }
 
     for(int i = NUMPIXELS - 1; i > 0; i--) { // For each pixel...
       int ratio = 0;
