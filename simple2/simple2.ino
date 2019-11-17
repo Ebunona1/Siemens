@@ -70,37 +70,16 @@ void setup() {
   digitalWrite(13,HIGH);
 }
 
-// Initial states
-int rainInc = 3;
-int rgreen, rblue, rred; // rain colour
-int tgreen, tblue, tred, // temperature colour
 float nitrOx;
-
-int humidity(int j){
-
-  // The first NeoPixel in a strand is #0, second is 1, all the way up
-  // to the count of pixels minus one.
-  
-  if (relative[j] > 70){
-    rainInc = 3;
-  } 
-  else if (relative[j] <= 70 && relative[j] > 60){
-    rainInc = 5;
-  }
-  else if (relative[j] <= 60){
-    rainInc = 7;
-  }
-
-  return rainInc;
-}
 
 void story(int j, int sample_max) {
   // The first NeoPixel in a strand is #0, second is 1, all the way up
   // to the count of pixels minus one.
-  
+
+  int rainInc;
+  int rgreen, rblue, rred; // rain colour
+  int tgreen, tblue, tred, // temperature colour
   int nitric_counter = 0;
-   
-  // rainInc = humidity(j);
 
   // Colour Bands based on Nitric Oxide and Carbon Monoxide (Rain Acidity and Storm)
   if (nitric[j] < 6.5) {
@@ -121,7 +100,7 @@ void story(int j, int sample_max) {
 
   // Colour Bands based on Temperature and RH relationship (Rain and Atmosphere)
   
-  if (temperature[j] < 11) {
+  if (temperature[j] < 11) { // cold
     if (relative[j] > 70){
       
       rainInc = 3;
@@ -139,12 +118,33 @@ void story(int j, int sample_max) {
     tred = 50;
     rainInc = 3;
   }
-  else if (temperature[j] >= 11 && temperature[j] < 13.5){
+  else if (temperature[j] >= 11 && temperature[j] < 13.5){ // warmer
+    if (relative[j] > 70){
+      
+      rainInc = 3;
+    } 
+    else if (relative[j] <= 70 && relative[j] > 60){
+      
+      rainInc = 5;
+    }
+    else if (relative[j] <= 60){
+      
+      rainInc = 7;
+    }
     tblue = 211;
     tgreen = 149;
     tred = 98;
   }
-  else {
+  else { // hot
+    if (relative[j] > 70){
+      rainInc = 3;
+    } 
+    else if (relative[j] <= 70 && relative[j] > 60){
+      rainInc = 5;
+    }
+    else if (relative[j] <= 60){
+      rainInc = 7;
+    }
     tred = 255;
     tblue = 0;
     tgreen = 50;
