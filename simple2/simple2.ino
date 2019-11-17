@@ -135,8 +135,8 @@ void story(int j, int sample_max) {
 
   while (nitric_counter < sample_max) {
 
-    if (nitrOx < 12.3) {
-      flowerServo.detach();
+    if (nitrOx < 12.3 || sample_max == SAMPLE_DELAY3) {
+      flowerServo.detach(); // Flowers stop growing
     }
     else {
       flowerServo.attach(PINSERVO);
@@ -144,8 +144,9 @@ void story(int j, int sample_max) {
     }
 
     for(int i = NUMPIXELS - 1; i > 0; i--) { // For each pixel...
+    
       int ratio = 0;
-      ratio = map(carbon[j], 957.99, 1816.01, 70, 255);
+      ratio = map(carbon[j], 957.99, 1816.01, 100, 255);
       analogWrite(PINMOTOR, ratio);
       
       pixels.clear();
@@ -175,7 +176,7 @@ void loop() {
   for (int j = 0; j < nitric_size; j++){
      story(j, SAMPLE_DELAY);
   }
-  /*
+  
   delay(1000);
   
   // Story for 0.5s resolution
@@ -189,5 +190,5 @@ void loop() {
   for (int j = 0; j < nitric_size; j++){
      story(j, SAMPLE_DELAY3);
   }
-  */
+  
 }
