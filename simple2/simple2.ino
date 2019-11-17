@@ -72,13 +72,15 @@ void setup() {
 
 float nitrOx;
 
+
+
 void story(int j, int sample_max) {
   // The first NeoPixel in a strand is #0, second is 1, all the way up
   // to the count of pixels minus one.
 
   int rainInc;
   int rgreen, rblue, rred; // rain colour
-  int tgreen, tblue, tred, // temperature colour
+  int tgreen, tblue, tred; // temperature colour
   int nitric_counter = 0;
 
   // Colour Bands based on Nitric Oxide and Carbon Monoxide (Rain Acidity and Storm)
@@ -101,54 +103,33 @@ void story(int j, int sample_max) {
   // Colour Bands based on Temperature and RH relationship (Rain and Atmosphere)
   
   if (temperature[j] < 11) { // cold
-    if (relative[j] > 70){
-      
-      rainInc = 3;
-    } 
-    else if (relative[j] <= 70 && relative[j] > 60){
-      
-      rainInc = 5;
-    }
-    else if (relative[j] <= 60){
-      
-      rainInc = 7;
-    }
     tblue = 255;
     tgreen = 200;
     tred = 50;
-    rainInc = 3;
   }
   else if (temperature[j] >= 11 && temperature[j] < 13.5){ // warmer
-    if (relative[j] > 70){
-      
-      rainInc = 3;
-    } 
-    else if (relative[j] <= 70 && relative[j] > 60){
-      
-      rainInc = 5;
-    }
-    else if (relative[j] <= 60){
-      
-      rainInc = 7;
-    }
-    tblue = 211;
-    tgreen = 149;
+    tblue = 50;
+    tgreen = 255;
     tred = 98;
   }
   else { // hot
-    if (relative[j] > 70){
-      rainInc = 3;
-    } 
-    else if (relative[j] <= 70 && relative[j] > 60){
-      rainInc = 5;
-    }
-    else if (relative[j] <= 60){
-      rainInc = 7;
-    }
     tred = 255;
     tblue = 0;
     tgreen = 50;
   }
+
+  if (relative[j] > 70){
+      
+      rainInc = 3;
+    } 
+    else if (relative[j] <= 70 && relative[j] > 60){
+      
+      rainInc = 5;
+    }
+    else if (relative[j] <= 60){
+      
+      rainInc = 7;
+    }
 
   nitrOx = flowers[j];
 
@@ -194,7 +175,7 @@ void loop() {
   for (int j = 0; j < nitric_size; j++){
      story(j, SAMPLE_DELAY);
   }
-
+  /*
   delay(1000);
   
   // Story for 0.5s resolution
@@ -208,4 +189,5 @@ void loop() {
   for (int j = 0; j < nitric_size; j++){
      story(j, SAMPLE_DELAY3);
   }
+  */
 }
